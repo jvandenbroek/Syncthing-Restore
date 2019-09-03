@@ -48,6 +48,13 @@ void MainWindow::on_pushButton_Browse_clicked()
     if (folder.isEmpty() == false) ui->lineEdit_stversions->setText(folder);
 }
 
+bool MainWindow::okCancelMessage(const QString &text)
+{
+    if (QMessageBox::warning(this, NULL, text, QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Ok) == QMessageBox::Cancel)
+        return false;
+    return true;
+}
+
 //The main job is done here :
 void MainWindow::on_pushButton_Start_clicked()
 {
@@ -80,7 +87,8 @@ void MainWindow::on_pushButton_Start_clicked()
         //2.1 - check if the file should be included to the restore process
         bool matching = false; //Can become true after some tests
 
-        if (ui->checkBox_restoreAll->isChecked() == true) matching = true;
+        if (ui->checkBox_restoreAll->isChecked() == true)
+            matching = true;
         else
         {
             QDateTime minimumTime = ui->dateTimeEdit_from->dateTime();
@@ -90,8 +98,10 @@ void MainWindow::on_pushButton_Start_clicked()
             bool bRet = getTimestamp(currentFile_DateTime, currentFile);
 
             if (bRet == false)
-                QMessageBox::warning(this, NULL, "Unable to read the timestamp of " + currentFile);
-
+            {
+                if (!okCancelMessage("Unable to read the timestamp of " + currentFile))
+                    return;
+            }
             else if ((currentFile_DateTime >= minimumTime) && (currentFile_DateTime <= maximumTime))
             {
                 //This file should be taken
@@ -120,7 +130,8 @@ void MainWindow::on_pushButton_Start_clicked()
             }
             else
             {
-                QMessageBox::warning(this, NULL, "Unable to prepare destination for " + currentFile);
+                if (!okCancelMessage("Unable to prepare destination for " + currentFile))
+                    return;
             }
         }
     }
@@ -189,10 +200,12 @@ void MainWindow::on_pushButton_Start_clicked()
                 if (bRet == false)
                 {
                     errorFlag = true;
-                    QString messageToDisplay = "Unable to overwrite " + restoredFilePath + "\n\n";
+
+                QString messageToDisplay = "Unable to overwrite " + restoredFilePath + "\n\n";
                     messageToDisplay += "May be the destination file is locked by another task ? "
                                         "Disk space ? Permissions ?";
-                    QMessageBox::warning(this, NULL, messageToDisplay);
+                if (!okCancelMessage(messageToDisplay))
+                    return;
                 }
             }
             else
@@ -211,7 +224,8 @@ void MainWindow::on_pushButton_Start_clicked()
             {
                 QString messageToDisplay = "Cannot move :\n" + currentFile + "\nto :\n" + restoredFilePath + "\n\n";
                 messageToDisplay += "Disk space ? Permissions ? Source locked by another task ?";
-                QMessageBox::warning(this, NULL, messageToDisplay);
+                if (!okCancelMessage(messageToDisplay))
+                    return;
             }
         }
     }

@@ -40,7 +40,7 @@ private slots:
     void on_pushButton_Start_clicked();
 
     void on_checkBox_restoreAll_clicked(bool checked);
-
+    bool okCancelMessage(const QString &text);
 private:
     Ui::MainWindow *ui;
 };

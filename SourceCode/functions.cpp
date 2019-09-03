@@ -17,26 +17,33 @@
 
 bool getTimestamp (QDateTime &dateTime, QString filepath)
 {
-    int nBegin = filepath.lastIndexOf('~');
-    if (nBegin == -1) return false; //not found
+    int nBegin = filepath.lastIndexOf('~', filepath.size() - 16);
+    if (nBegin == -1)
+        return false; //not found
 
     //~YYYYMMDD-HHMMSS : 16 characters
-    if (filepath.size() < nBegin + 16) return false; //timestamp size does not fit
+    if (filepath.size() < nBegin + 16)
+        return false; //timestamp size does not fit
 
     QChar dash_Check = filepath[nBegin+9];
-    if (dash_Check != '-') return false; //the dash is not where it should be
+    if (dash_Check != '-')
+        return false; //the dash is not where it should be
 
     //here, we are sure that the range is the good one :
     filepath.remove(0, nBegin+1); //Erase everything before YYYYMMDD-HHMMSS
     QString strDateTime = filepath.left(15); //crop the exceeding characters
 
-    if (strDateTime.size() != 15) return false; //something is wrong !
+    if (strDateTime.size() != 15)
+        return false; //something is wrong !
 
     QString strDate = strDateTime.left(8); //YYYYMMDD
     QString strTime = strDateTime.right(6); //HHMMSS
 
     QDate fileDate = QDate::fromString(strDate, "yyyyMMdd");
     QTime fileTime = QTime::fromString(strTime, "hhmmss");
+
+    if (!fileDate.isValid() || !fileTime.isValid())
+        return false;
 
     dateTime.setDate(fileDate);
     dateTime.setTime(fileTime);
@@ -46,7 +53,7 @@ bool getTimestamp (QDateTime &dateTime, QString filepath)
 
 bool stripTimestamp (QString &filepath)
 {
-    int nBegin = filepath.lastIndexOf('~');
+    int nBegin = filepath.lastIndexOf('~', filepath.size() - 16);
     if (nBegin == -1) return false; //not found
 
     //~YYYYMMDD-HHMMSS : 16 characters
